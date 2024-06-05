@@ -2,11 +2,11 @@
 
 ## Student Information
 
-### Student Name  : Name here
+### Student Name  : Bryan Lee
 
-### Student ID    : ID here
+### Student ID    : 922649673
 
-### Student Email : Email here
+### Student Email : blee37@sfsu.edu
 
 ## Requirements
 
