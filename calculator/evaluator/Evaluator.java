@@ -7,68 +7,124 @@ import java.util.StringTokenizer;
 
 public class Evaluator {
 
-  private final Stack<Operand> operandStack;
-  private final Stack<Operator> operatorStack;
+    private final Stack<Operand> operandStack;
+    private final Stack<Operator> operatorStack;
 
 
-  public Evaluator() {
-    operandStack = new Stack<>();
-    operatorStack = new Stack<>();
-  }
-
-  public int evaluateExpression(String expression ) throws InvalidTokenException {
-    String expressionToken;
-    StringTokenizer expressionTokenizer;
-    String delimiters = " +/*-^";
-
-    // 3 arguments tells the tokenizer to return delimiters as tokens
-    expressionTokenizer = new StringTokenizer( expression, delimiters, true );
-
-    while ( expressionTokenizer.hasMoreTokens() ) {
-      // filter out spaces
-      if ( !( expressionToken = expressionTokenizer.nextToken() ).equals( " " )) {
-        // check if token is an operand
-        if ( Operand.check( expressionToken )) {
-          operandStack.push( new Operand( expressionToken ));
-        } else {
-          if ( ! Operator.check( expressionToken )) {
-            throw new InvalidTokenException(expressionToken);
-          }
-
-
-          // TODO fix this line of code.
-          Operator newOperator = new Operator();
-
-         
-            while (operatorStack.peek().priority() >= newOperator.priority() ) {
-              Operator operatorFromStack = operatorStack.pop();
-              Operand operandTwo = operandStack.pop();
-              Operand operandOne = operandStack.pop();
-              Operand result = operatorFromStack.execute( operandOne, operandTwo );
-              operandStack.push( result );
-            }
-
-            operatorStack.push( newOperator );
-          
-        }
-      }
+    public Evaluator() {
+        operandStack = new Stack<>();
+        operatorStack = new Stack<>();
     }
 
+    public int evaluateExpression(String expression) throws InvalidTokenException {
+        String expressionToken;
+        StringTokenizer expressionTokenizer;
+        String delimiters = " +/*-^()";
 
-    /*
-     * once no more tokens need to be scanned from StringTokenizer,
-     * we need to evaluate the remaining sub-expressions.
-     */
-    return 0;
-  }
+        // 3 arguments tells the tokenizer to return delimiters as tokens
+        expressionTokenizer = new StringTokenizer(expression, delimiters, true);
 
-  public static void main(String[] args) throws InvalidTokenException {
-     if(args.length == 1){
-      Evaluator e = new Evaluator();
-      System.out.println(e.evaluateExpression(args[0]));
-     }else{
-      System.err.println("Invalid arguments or No expression given");
-     }
-  }
+//        while (expressionTokenizer.hasMoreTokens()) {
+//            // filter out spaces
+//            if (!(expressionToken = expressionTokenizer.nextToken()).equals(" ")) {
+//                if (!expressionToken.equals("(") && !expressionToken.equals(")")) { // ignore ( as per Evaluating Infix Expression Algorithm)
+//                    // check if token is an operand
+//                    if (Operand.check(expressionToken)) {
+//                        operandStack.push(new Operand(expressionToken));
+//                    } else {
+//                        // Checks for invalid operators
+//                        if (!Operator.check(expressionToken)) {
+//                            throw new InvalidTokenException(expressionToken);
+//                        }
+//
+//                        // TODO fix this line of code.
+//                        Operator newOperator = Operator.getOperator(expressionToken);
+//
+//                        while (!operatorStack.isEmpty() && operatorStack.peek().priority() >= newOperator.priority()) {
+//                            Operator operatorFromStack = operatorStack.pop();
+//                            Operand operandTwo = operandStack.pop();
+//                            Operand operandOne = operandStack.pop();
+//                            Operand result = operatorFromStack.execute(operandOne, operandTwo);
+//                            operandStack.push(result);
+//                        }
+//                        operatorStack.push(newOperator);
+//                    }
+//                } else if (expressionToken.equals(")")) {
+//                    while (!operatorStack.isEmpty()) {
+//                        Operator operatorFromStack = operatorStack.pop();
+//                        Operand operandTwo = operandStack.pop();
+//                        Operand operandOne = operandStack.pop();
+//                        Operand result = operatorFromStack.execute(operandOne, operandTwo);
+//                        operandStack.push(result);
+//                    }
+//                }
+//            }
+//        }
 
+        while (expressionTokenizer.hasMoreTokens()) {
+            // filter out spaces
+            if (!(expressionToken = expressionTokenizer.nextToken()).equals(" ")) {
+                // check if token is an operand
+                if (Operand.check(expressionToken)) {
+                    operandStack.push(new Operand(expressionToken));
+                } else if (expressionToken.equals("(")) { // push open parenthesis as operator for stopping point for looped execution
+                    operatorStack.push(Operator.getOperator(expressionToken));
+                } else if (expressionToken.equals(")")) {
+                    /*
+                    Per evaluating infix expressions algorithm; on encounter with close parenthesis:
+                    1. pop the top operator from operatorStack
+                        1a. (and however many operands it requires from the stack aka stopping at open parenthesis)
+                    2. push the result of applying that operator to those operands to operandStack
+                     */
+                    while (!operatorStack.isEmpty() && !operatorStack.peek().equals(Operator.getOperator("("))) {
+                        Operator operatorFromStack = operatorStack.pop();
+                        Operand operandTwo = operandStack.pop();
+                        Operand operandOne = operandStack.pop();
+                        Operand result = operatorFromStack.execute(operandOne, operandTwo);
+                        operandStack.push(result);
+                    }
+                    operatorStack.pop(); // Remove the open parenthesis from the stack
+                } else {
+                    //Check for invalid operator
+                    if (!Operator.check(expressionToken)) {
+                        throw new InvalidTokenException(expressionToken);
+                    }
+
+                    Operator newOperator = Operator.getOperator(expressionToken);
+
+                    while (!operatorStack.isEmpty() && operatorStack.peek().priority() >= newOperator.priority()) {
+                        Operator operatorFromStack = operatorStack.pop();
+                        Operand operandTwo = operandStack.pop();
+                        Operand operandOne = operandStack.pop();
+                        Operand result = operatorFromStack.execute(operandOne, operandTwo);
+                        operandStack.push(result);
+                    }
+                    operatorStack.push(newOperator);
+                }
+            }
+        }
+
+        /*
+         * once no more tokens need to be scanned from StringTokenizer,
+         * we need to evaluate the remaining sub-expressions.
+         */
+        while (!operatorStack.isEmpty()) {
+            Operator operatorFromStack = operatorStack.pop();
+            Operand operandTwo = operandStack.pop();
+            Operand operandOne = operandStack.pop();
+            Operand result = operatorFromStack.execute(operandOne, operandTwo);
+            operandStack.push(result);
+        }
+
+        return operandStack.pop().getValue();
+    }
+
+    public static void main(String[] args) throws InvalidTokenException {
+        if (args.length == 1) {
+            Evaluator e = new Evaluator();
+            System.out.println(e.evaluateExpression(args[0]));
+        } else {
+            System.err.println("Invalid arguments or No expression given");
+        }
+    }
 }

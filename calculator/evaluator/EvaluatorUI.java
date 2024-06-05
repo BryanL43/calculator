@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.EmptyStackException;
 
 public class EvaluatorUI extends JFrame implements ActionListener {
 
@@ -66,7 +67,30 @@ public class EvaluatorUI extends JFrame implements ActionListener {
       *                          button is pressed.
       */
      public void actionPerformed(ActionEvent actionEventObject) {
+         Evaluator evaluator = new Evaluator();
+         String equation;
+         String btnClicked = actionEventObject.getActionCommand();
 
+         switch (btnClicked) {
+             case "=":
+                 equation = this.expressionTextField.getText();
+                 try {
+                     this.expressionTextField.setText(String.valueOf(evaluator.evaluateExpression(equation)));
+                 } catch (InvalidTokenException | EmptyStackException e) {
+                     this.expressionTextField.setText("Error");
+                 }
+                 break;
+             case "C", "CE":
+                 this.expressionTextField.setText("");
+                 break;
+             default:
+                 if (this.expressionTextField.getText().equals("Error")) {
+                     this.expressionTextField.setText("");
+                 }
+                 equation = this.expressionTextField.getText() + btnClicked;
+                 this.expressionTextField.setText(equation);
+                 break;
 
+         }
      }
  }
