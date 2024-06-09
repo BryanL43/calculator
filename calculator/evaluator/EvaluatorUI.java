@@ -7,10 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EmptyStackException;
 
+import java.util.Stack;
+
 public class EvaluatorUI extends JFrame implements ActionListener {
 
      private JTextField expressionTextField = new JTextField();
      private JPanel buttonPanel = new JPanel();
+     private Stack<String> entryHistory = new Stack<>();
 
      // total of 20 buttons on the calculator,
      // numbered from left to right, top to bottom
@@ -76,12 +79,25 @@ public class EvaluatorUI extends JFrame implements ActionListener {
                  equation = this.expressionTextField.getText();
                  try {
                      this.expressionTextField.setText(String.valueOf(evaluator.evaluateExpression(equation)));
+                     entryHistory.clear(); //Clears the stored history
+                     entryHistory.push(String.valueOf(evaluator.evaluateExpression(equation))); //Push the result into the empty stack for next input
                  } catch (InvalidTokenException | EmptyStackException e) {
                      this.expressionTextField.setText("Error");
                  }
                  break;
-             case "C", "CE":
+             case "C":
                  this.expressionTextField.setText("");
+                 entryHistory.clear(); //Clears the stored history
+                 break;
+             case "CE":
+                 if (!entryHistory.isEmpty()) {
+                     entryHistory.pop(); //Remove the last entry from history
+                     StringBuilder updatedText = new StringBuilder();
+                     for (String entry : entryHistory) {
+                         updatedText.append(entry);
+                     }
+                     this.expressionTextField.setText(updatedText.toString());
+                 }
                  break;
              default:
                  if (this.expressionTextField.getText().equals("Error")) {
@@ -89,8 +105,8 @@ public class EvaluatorUI extends JFrame implements ActionListener {
                  }
                  equation = this.expressionTextField.getText() + btnClicked;
                  this.expressionTextField.setText(equation);
+                 entryHistory.push(btnClicked); //Tracks the entry history
                  break;
-
          }
      }
  }
