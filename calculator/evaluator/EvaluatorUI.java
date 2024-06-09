@@ -77,19 +77,20 @@ public class EvaluatorUI extends JFrame implements ActionListener {
          switch (btnClicked) {
              case "=":
                  equation = this.expressionTextField.getText();
-                 try {
+                 try { //Handle valid evaluation expression and updates entry history
                      this.expressionTextField.setText(String.valueOf(evaluator.evaluateExpression(equation)));
-                     entryHistory.clear(); //Clears the stored history
+                     entryHistory.clear();
                      entryHistory.push(String.valueOf(evaluator.evaluateExpression(equation))); //Push the result into the empty stack for next input
-                 } catch (InvalidTokenException | EmptyStackException e) {
+                 } catch (InvalidTokenException | EmptyStackException e) { //Error cases that resets the entryHistory for new input
                      this.expressionTextField.setText("Error");
+                     entryHistory.clear();
                  }
                  break;
-             case "C":
+             case "C": //Default clear history
                  this.expressionTextField.setText("");
-                 entryHistory.clear(); //Clears the stored history
+                 entryHistory.clear();
                  break;
-             case "CE":
+             case "CE": //Clears the last inputted entry history
                  if (!entryHistory.isEmpty()) {
                      entryHistory.pop(); //Remove the last entry from history
                      StringBuilder updatedText = new StringBuilder();
@@ -99,9 +100,10 @@ public class EvaluatorUI extends JFrame implements ActionListener {
                      this.expressionTextField.setText(updatedText.toString());
                  }
                  break;
-             default:
+             default: //Operand and Operator button handler
                  if (this.expressionTextField.getText().equals("Error")) {
                      this.expressionTextField.setText("");
+                     entryHistory.clear();
                  }
                  equation = this.expressionTextField.getText() + btnClicked;
                  this.expressionTextField.setText(equation);
