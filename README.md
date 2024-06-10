@@ -65,7 +65,7 @@ javac -d target --class-path "./;.\lib\junit-platform-console-standalone-1.9.3.j
 
 ### Linux/MacOS
 ```
-junit-platform-console-standalone-1.9.3.jar" ./tests/operator/*.java
+javac -d target --class-path "./:./lib/junit-platform-console-standalone-1.9.3.jar" ./tests/operator/*.java
 javac -d target --class-path "./:./lib/junit-platform-console-standalone-1.9.3.jar" ./tests/operand/*.java
 javac -d target --class-path "./:./lib/junit-platform-console-standalone-1.9.3.jar" ./tests/*.java
 ```
